@@ -5,6 +5,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var hbs = require('express-handlebars');
 var cheerio = require('cheerio');
+var axios = require ('axios');
 
 //require models
 var db = require('./models');
@@ -31,4 +32,9 @@ var routes = require('./controllers/newscontroller.js')
 
 
 //Connect to the Mongo DB
-mongoose.connect("")
+mongoose.connect("");
+
+//Server Start
+app.listen(PORT, function() {
+    console.log("App running on port  " + PORT);
+});
