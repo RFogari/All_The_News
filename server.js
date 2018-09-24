@@ -28,7 +28,7 @@ app.engine('handlebars', hbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 
 //import routes
-var routes = require('./controllers/newscontroller.js')
+var routes = require('./controller/newscontroller.js')
 
 
 //Connect to the Mongo DB
