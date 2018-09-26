@@ -54,7 +54,7 @@ app.get('/scrape', function(req, res) {
 });
 
 //Route to retrieve all data from the DB
-app.get('/articles', function (req, res) {
+app.get('/article', function (req, res) {
     //query to find all scraped data in DB
     db.Article.find({})
 
