@@ -14,13 +14,13 @@ var article = require('../models/article.js');
 
 
 //Get route for scraping artciles from NYTimes website.
-app.get('/scrape', fucntion(req, res){
+app.get('/scrape', function(req, res) {
 
-    //Making a request for articles from the New York Times.
+    //Making a request for articles from the New York Times
 
-    request("https://www.nytimes.com/", function(error, response, html) {
+    request('https://www.nytimes.com/ ', function(error, response, html) {
 
-        //html body request gets loaded into cheerio.
+        //html body request gets loaded into cheerio.//
         var $ = cheerio.load(html);
         
         //Each artilce has a headline class
@@ -70,10 +70,11 @@ app.get('/articles', function (req, res) {
 });
 
 
-//Route to grab article by id - this will be for leaving notes
+///Route to grab article by id - this will be for leaving notes//
+
 app.get('/articles/:id', function(req, res) {
     //query to finnd the article in the DB by searching on the ID
-    db.article.findOne({ __id: req.paramus.id })
+    db.article.findOne({ _id: req.paramus.id })
 
     //After query for article, populate associated notes
     .populate('note')
@@ -82,9 +83,10 @@ app.get('/articles/:id', function(req, res) {
         res.json(dbArticle);
     })
     .catch(function(err) {
-        res.json(err
-    }
+        res.json(err)
+    });
 })
+
 
 
 //Route to save articles and updating notes on articles.
@@ -92,8 +94,18 @@ app.post('/articles/:id', function(req, res) {
     //creating a new note.  Req.body is from the client side.
     db.Note.create(req.body)
         .then(function(dbNote) {
+            
             //after note is created, note is added to article based on article ID
-
-
-        })
-})
+                return db.Article.findOneAndUpdate(
+                        { _id: req.params.id },
+                        { note: dbNote._id },
+                        { new: true}
+                    
+                    //After the note is posted, the updated article is returned to the frontend.
+                    ).then(function(dbArticle) {
+                        res.json(dbArticle);
+                    }).catch(function(err) {
+                        res.json(err);
+                    });
+        });
+});
