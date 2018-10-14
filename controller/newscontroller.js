@@ -18,20 +18,25 @@ app.get('/scrape', function(req, res) {
 
     //Making a request for articles from the New York Times
 
-    request('https://www.nytimes.com/ ', function(error, response, html) {
+    request('https://www.nytimes.com/').then(function(response) {
 
         //html body request gets loaded into cheerio.//
-        var $ = cheerio.load(html);
+        var $ = cheerio.load(response.data);
         
+             ///result object
+             var result = {};
+
         //Each artilce has a headline class
-        $('css-6p61n1').each(function(i, element) {
+        $('div.story-body').each(function(i, element) {
 
-            ///result object
-            var result = {};
+           
+            var link = $(element).find("a").attr("href");
+            var headline = $(element).find("h2.headline").text().trim();
+            var summary = $(element).find("p.summary").text().trim();
 
-            result.headline = $(this).children('balancedHeadline').text();
-            result.summary = $(this).children('css-balf30 e1n8kpyg0').text();
-            result.link = $(this).children("a").attr("href");
+            result.link = link;
+            result.headline = headline;
+            result.summary = summary;
 
             //if function to validate element has all 3 requirements
 
@@ -54,7 +59,7 @@ app.get('/scrape', function(req, res) {
 });
 
 //Route to retrieve all data from the DB
-app.get('/article', function (req, res) {
+app.get('/', function (req, res) {
     //query to find all scraped data in DB
     db.Article.find({})
 
