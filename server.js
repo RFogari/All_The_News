@@ -41,18 +41,15 @@ mongoose.connect(MONGODB_URI);
 
 
 
-
-//require models
-var comment = require('../models/note.js');
-var article = require('../models/article.js');
+//routes
 
 
 app.get("/", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/index.html"))
+    res.render("index")
 })
 
 app.get("/saved", function(req, res) {
-    res.sendFile(path.join(__dirname, "public/saved.html"))
+    res.render("index", { articles: data })
 })
 
 
@@ -62,7 +59,7 @@ app.get('/scrape', function(req, res) {
 
     //Making a request for articles from the New York Times
 
-    request('https://www.nytimes.com/').then(function(response) {
+    axios.get('https://www.nytimes.com/').then(function(response) {
 
         //html body request gets loaded into cheerio.//
         var $ = cheerio.load(response.data);
@@ -103,7 +100,7 @@ app.get('/scrape', function(req, res) {
         });   
 
         //if scrape completes with data send updated inxex.html file
-        res.sendFile(path.join(__dirname, "public/index.html"))
+        res.render("index", { articles: result })
     });
 });
 

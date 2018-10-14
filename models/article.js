@@ -50,4 +50,4 @@ var newsArticleSchema = new Schema({
 var article = mongoose.model('article', newsArticleSchema);
 
 //export the model
-module.exports(article);
+module.exports = article;
