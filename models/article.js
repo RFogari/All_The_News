@@ -23,16 +23,31 @@ var newsArticleSchema = new Schema({
     },
 
     //keyID being used to represent the object ID.
-    keyID: {
+    note: {
         type: Schema.Types.ObjectId,
-        ref: "keyID"
+        ref: "Note"
 
+    },
+
+    created: {
+        type: Date,
+        default: Date.now
+    },
+
+    status: {
+        type: String,
+        default: "Save Article"
+    },
+
+    isSaved: {
+        type: Boolean,
+        default: false
     }
 });
 
 //Schema is processed through Mongoose to create a model
 
-var Article = mongoose.model('Article', newsArticleSchema);
+var article = mongoose.model('article', newsArticleSchema);
 
 //export the model
-module.exports(Article);
+module.exports(article);
