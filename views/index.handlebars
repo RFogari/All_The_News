@@ -1,0 +1,21 @@
+<div>
+    <div class="articles-container">
+
+        <!-- for each article stored -->
+        {{#each articles}}
+
+        <div class="article-block">
+                <!-- link to article-->
+                <a class="articleLink" href="{{this.link}}"></a>
+                <a class="articleHeadline" href="{{this.headline}}"></a>
+                <a class="articleSummary" href="{{this.summary}}"></a>
+        </div>
+
+
+        {{/each}}
+
+    </div>
+
+    
+
+</div>
