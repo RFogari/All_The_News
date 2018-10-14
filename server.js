@@ -28,8 +28,17 @@ app.engine('handlebars', hbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 
 
+//mongoDB
+
 //Connect to the Mongo DB
-mongoose.connect("");
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
+
+// Set mongoose to leverage built in JavaScript ES6 Promises
+// Connect to the Mongo DB
+mongoose.Promise = Promise;
+mongoose.connect(MONGODB_URI);
+
 
 
 
@@ -81,7 +90,11 @@ app.get('/scrape', function(req, res) {
                 db.Article.create(result)
                 .then(function(dbArticle) {
                     console.log(dbArticle);
+
+                    //counter
+                    counter++;
                 })
+                //catch error and send back to frontend
                 .catch(function(err) {
                     return res.json(err);
                 });
@@ -89,12 +102,13 @@ app.get('/scrape', function(req, res) {
                 
         });   
 
-        res.send('Articles Have Been Scraped');
+        //if scrape completes with data send updated inxex.html file
+        res.sendFile(path.join(__dirname, "public/index.html"))
     });
 });
 
 //Route to retrieve all data from the DB
-app.get('/', function (req, res) {
+app.get('/articles', function (req, res) {
     //query to find all scraped data in DB
     db.Article.find({})
 
