@@ -8,7 +8,8 @@ var cheerio = require('cheerio');
 var axios = require ('axios');
 
 //require models
-var db = require('./models');
+var Article = require('./models/article')
+var Note = require('./models/note')
 
 //port setting
 var PORT = process.env.PORT || 3000;
@@ -17,7 +18,7 @@ var PORT = process.env.PORT || 3000;
 var app = express();
 
 //Use body-parser to hadle form submission
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 //public folder as stactic directory for front-end HTML/CSS.
 app.use(express.static('public'));
@@ -29,7 +30,7 @@ app.set('view engine', 'handlebars');
 
 
 //mongoDB
-
+//var db = mongoose.connection;
 //Connect to the Mongo DB
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
@@ -59,10 +60,10 @@ app.get('/scrape', function(req, res) {
 
     //Making a request for articles from the New York Times
 
-    axios.get('https://www.nytimes.com/').then(function(response) {
+    request('https://www.nytimes.com/').then(function(error, response, html) {
 
         //html body request gets loaded into cheerio.//
-        var $ = cheerio.load(response.data);
+        var $ = cheerio.load(html);
         
              ///result object
              var result = {};
@@ -83,31 +84,37 @@ app.get('/scrape', function(req, res) {
 
             if(headline && summary && link) {
 
-                //insert scraped data into Mongo DB
-                db.Article.create(result)
-                .then(function(dbArticle) {
-                    console.log(dbArticle);
+                var entry = new article(result)
 
-                    //counter
-                    counter++;
+                //insert scraped data into Mongo DB
+                entry.save(function (err, doc) {
+                    //Log error
+                    if(err) {
+                        console.log(err);
+                    }
+
+                    //no error log the result
+                    else{
+                        console.log(doc)
+                    }
                 })
-                //catch error and send back to frontend
-                .catch(function(err) {
-                    return res.json(err);
-                });
+              
+              
             };
                 
         });   
 
         //if scrape completes with data send updated inxex.html file
-        res.render("index", { articles: result })
+        res.redirect("/")
+
+        console.log("Scrape Complete!");
     });
 });
 
 //Route to retrieve all data from the DB
 app.get('/articles', function (req, res) {
     //query to find all scraped data in DB
-    db.Article.find({})
+    Article.find({})
 
         //found articles are sent back to the browser
         .then(function(dbArticle) {

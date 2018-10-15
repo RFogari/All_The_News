@@ -1,4 +1,4 @@
-$(document).ready(function(){
+
 
     
     //display articles on screen 
@@ -52,4 +52,3 @@ $(document).ready(function(){
             })
     })
 
-})
