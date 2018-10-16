@@ -6,6 +6,7 @@ var mongoose = require('mongoose');
 var hbs = require('express-handlebars');
 var cheerio = require('cheerio');
 var axios = require ('axios');
+var request = require('request');
 
 //require models
 var Article = require('./models/article')
@@ -44,14 +45,22 @@ mongoose.connect(MONGODB_URI);
 
 //routes
 
-
 app.get("/", function(req, res) {
-    res.render("index")
+
+    Article.find({}, null, function(err, data) {/*
+        if(data.length === 0) {
+            //res.redirect('/scrape');
+            console.log("No Articles Available - Run Scrape")
+        } else */ {
+            res.render("index", {articles: data});
+        }
+    })
 })
 
-app.get("/saved", function(req, res) {
-    res.render("index", { articles: data })
-})
+/*
+app.get("/", function(req, res) {
+    res.render("index", { articles: res })
+})*/
 
 
 
@@ -60,18 +69,22 @@ app.get('/scrape', function(req, res) {
 
     //Making a request for articles from the New York Times
 
-    request('https://www.nytimes.com/').then(function(error, response, html) {
+    request('https://www.nytimes.com/', function(error, response, html) {
 
         //html body request gets loaded into cheerio.//
         var $ = cheerio.load(html);
+
+        console.log($);
         
+             //article array  for storing scraped artciles before adding to mongoDB
+             var articleArray = [];
              ///result object
              var result = {};
 
         //Each artilce has a headline class
         $('div.story-body').each(function(i, element) {
 
-           
+                     
             var link = $(element).find("a").attr("href");
             var headline = $(element).find("h2.headline").text().trim();
             var summary = $(element).find("p.summary").text().trim();
@@ -80,28 +93,25 @@ app.get('/scrape', function(req, res) {
             result.headline = headline;
             result.summary = summary;
 
-            //if function to validate element has all 3 requirements
+              //use Article model to create a new object
+              var entry = new Article(result);
 
-            if(headline && summary && link) {
-
-                var entry = new article(result)
-
-                //insert scraped data into Mongo DB
-                entry.save(function (err, doc) {
-                    //Log error
-                    if(err) {
-                        console.log(err);
-                    }
-
-                    //no error log the result
-                    else{
-                        console.log(doc)
-                    }
+              Article.find({headline: result.headline}, function(err, data) {
+                  if (data.length === 0) {
+                    
+                    entry.save(function(err, data) {
+                        if (err) throw err;
+                        console.log(data);
+                    });
+                  }
                 })
-              
-              
-            };
+
+              console.log("Scrape has completed.")
+              res.redirect("/");
+
+
                 
+            
         });   
 
         //if scrape completes with data send updated inxex.html file
@@ -114,17 +124,16 @@ app.get('/scrape', function(req, res) {
 //Route to retrieve all data from the DB
 app.get('/articles', function (req, res) {
     //query to find all scraped data in DB
-    Article.find({})
+    Article.find({}, function(err, doc){
+        
+        //console log errors
+        if(err) {
+            console.log(err);
+        } else {
+            res.json(doc);
+        }
+    });
 
-        //found articles are sent back to the browser
-        .then(function(dbArticle) {
-            res.json(dbArticle);
-        })
-
-        //if error, catch error.
-        .catch(function(err) {
-            res.json(err);
-        });
 });
 
 

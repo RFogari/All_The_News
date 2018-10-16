@@ -3,7 +3,7 @@
     
     //display articles on screen 
     function displayArticles() {
-        $.getJSON("/articles", function(data) {
+        $.getJSON("/scrape", function(data) {
             //loop through each article
             for (var i = 0; i < data.length; i++) {
 
